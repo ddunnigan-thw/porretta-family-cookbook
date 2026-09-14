@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Share a Dish Photo — Porretta Family Recipes</title>
+<style>
+  :root { --cream:#faf6ef; --ink:#3a2e24; --accent:#a3542f; --card:#fffdf9; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--cream); color:var(--ink);
+         font-family:Georgia,'Times New Roman',serif; line-height:1.5;
+         display:flex; justify-content:center; padding:24px 16px 48px; }
+  main { width:100%; max-width:520px; background:var(--card);
+         border:1px solid #e7dcc8; border-radius:14px; padding:28px 24px;
+         box-shadow:0 2px 12px rgba(58,46,36,.07); }
+  h1 { margin:0 0 6px; font-size:1.7rem; }
+  .sub { margin:0 0 22px; color:#6d5c4b; font-size:.98rem; }
+  label { display:block; margin:0 0 16px; font-size:.95rem; font-weight:bold; }
+  input[type=text], input[type=file] {
+    display:block; width:100%; margin-top:6px; padding:12px;
+    font-size:1rem; font-family:inherit; color:var(--ink);
+    border:1px solid #d8c9ae; border-radius:8px; background:#fff; }
+  input[type=file] { padding:10px; }
+  .hint { font-weight:normal; color:#8a7660; font-size:.85rem; }
+  button { width:100%; padding:14px; font-size:1.05rem; font-family:inherit;
+           font-weight:bold; color:#fff; background:var(--accent);
+           border:none; border-radius:10px; cursor:pointer; }
+  button:disabled { opacity:.55; cursor:wait; }
+  #status { margin:16px 0 0; font-size:.95rem; min-height:1.4em; }
+  #status.ok { color:#2e7d32; } #status.err { color:#b3261e; }
+  .foot { margin-top:22px; font-size:.85rem; color:#8a7660; text-align:center; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Share a Dish Photo</h1>
+  <p class="sub">Made one of the family recipes? Send us a photo — it will appear on the recipe site within the hour.</p>
+  <form id="uploadForm" novalidate>
+    <label>Recipe
+      <input list="recipes" id="recipe" placeholder="Start typing a recipe name…" autocomplete="off" required>
+      <datalist id="recipes">
+        <option value="Alpine Chicken Casserole">
+        <option value="Angel Wings (Chrusciki)">
+        <option value="Anginetti Cream Puffs">
+        <option value="Apple Crumb Pie">
+        <option value="Apple Loaf">
+        <option value="Apple Pie Topping">
+        <option value="Apple Torte">
+        <option value="Apple Walnut Cake">
+        <option value="Apple-Nutmeg Conserve">
+        <option value="Applesauce">
+        <option value="Apricot Glazed Spareribs">
+        <option value="Artichoke Dip">
+        <option value="Artichoke Salad">
+        <option value="Asparagus and Peas">
+        <option value="Asparagus En Croute">
+        <option value="Bacardi Rum Cake">
+        <option value="Baccala">
+        <option value="Baked Asparagus Soup">
+        <option value="Baked Pork Chops">
+        <option value="Banana Cake">
+        <option value="Barbecue Sauce">
+        <option value="Barbecue Sauce for Hamburgers">
+        <option value="Barbecued Lamb Steaks or Chops">
+        <option value="Barbecued Spareribs Sauce">
+        <option value="Basil-Tomato Tart">
+        <option value="Bavarian Apple Cheesecake">
+        <option value="Bean Salad">
+        <option value="Beans and Macaroni">
+        <option value="Beef Barbecue">
+        <option value="Beef Burgundy">
+        <option value="Beef Stroganoff">
+        <option value="Beer Bread">
+        <option value="Biscotti">
+        <option value="Blueberry Salad">
+        <option value="Bracciole">
+        <option value="Braised Endive">
+        <option value="Braised Sauerkraut with Pork Roast">
+        <option value="Bread and Butter Pickles">
+        <option value="Breaded Pork Chops">
+        <option value="Breakfast Strata">
+        <option value="Broccoli and Cheese Casserole">
+        <option value="Broccoli and Eggs">
+        <option value="Broccoli and Macaroni">
+        <option value="Broccoli Pasta">
+        <option value="Broccoli Pasta Soup">
+        <option value="Broccoli Rice Casserole">
+        <option value="Broccoli Salad">
+        <option value="Broccoli/Pea Salad">
+        <option value="Buckeyes">
+        <option value="Burdocks">
+        <option value="Butter Pecan Tarts">
+        <option value="Cabbage Salad">
+        <option value="Cabbage Stew and Sausage">
+        <option value="Candied Fruit Slices">
+        <option value="Canning Tomatoes">
+        <option value="Cannoli">
+        <option value="Caponatina">
+        <option value="Cheddar Almond Squares">
+        <option value="Cheese Cake Deluxe">
+        <option value="Cherry Delight">
+        <option value="Cherry Fruit Squares">
+        <option value="Chex Mix">
+        <option value="Chicken &#x27;n Swiss Extraordinaire">
+        <option value="Chicken Cacciatore">
+        <option value="Chicken Crescent Squares">
+        <option value="Chicken Divan">
+        <option value="Chicken Livers Wrapped in Bacon">
+        <option value="Chicken or Turkey A La King">
+        <option value="Chicken Parmesan">
+        <option value="Chicken Pot Pie">
+        <option value="Chicken Soup">
+        <option value="Chicken with Mushroom Soup and Rice">
+        <option value="Chicken with Rice">
+        <option value="Chinese Cabbage Salad">
+        <option value="Chinese Chicken">
+        <option value="Chocolate Mayonnaise Cake">
+        <option value="Chocolate Nut Cookies">
+        <option value="Christmas Rainbow">
+        <option value="Christmas Snowballs">
+        <option value="Christmas Sugar Cookies">
+        <option value="Cinnamon Apple Crepes">
+        <option value="Cinnamon Pastry">
+        <option value="Cinnamon Swirl Pudd&#x27;n Cake">
+        <option value="Clams Casino">
+        <option value="Cocktail Sauce for Shrimp Cocktail">
+        <option value="Cold Salad Marinade">
+        <option value="Cool Whip Surprise">
+        <option value="Cranberry Pound Cake">
+        <option value="Crazy Cake">
+        <option value="Cream Cheese Pecan Pie">
+        <option value="Cream of Cauliflower Soup">
+        <option value="Creamed Eggs and Peas on Toast">
+        <option value="Creamy Broccoli or Cauliflower Soup">
+        <option value="Crispelli">
+        <option value="Crown Roast of Pork">
+        <option value="Cucidattis">
+        <option value="Cutout Cookies">
+        <option value="Daniel&#x27;s Chili">
+        <option value="Devil&#x27;s Food Cake">
+        <option value="Deviled Eggs">
+        <option value="Dressing or Stuffing for Poultry">
+        <option value="Easy Cheesy Cauliflower Bake">
+        <option value="Eclair Cake">
+        <option value="Eggplant Parmigana">
+        <option value="Eggplant Tomato Sauce">
+        <option value="Eggs and Olives">
+        <option value="Escargot La Bourgogne">
+        <option value="Folgarelli&#x27;s Pizzelles">
+        <option value="Fool Proof Prime Rib">
+        <option value="French Bread">
+        <option value="French Onion Soup">
+        <option value="French Oven Stew">
+        <option value="French Pudding">
+        <option value="French Toast with Cherry Butter">
+        <option value="Fresh Tomato Sauce Sicilian">
+        <option value="Fried Cabbage">
+        <option value="Fried Chicken">
+        <option value="Fried Zucchini">
+        <option value="Fruit Cobbler">
+        <option value="Garlic Shrimp">
+        <option value="Garlock&#x27;s Double Thick Pork Chops">
+        <option value="Glazed Raspberry Orange Turkey">
+        <option value="Golden Peach Pie">
+        <option value="Granola">
+        <option value="Great Barbecue Sauce">
+        <option value="Greek Potato, Spinach and Feta Cheese Omelet">
+        <option value="Green Bean Casserole">
+        <option value="Green Soup with Rags and Cheese">
+        <option value="Ham and Bean Soup">
+        <option value="Hawaiian Eggs">
+        <option value="Hot Dog Stew">
+        <option value="Hot Pepper Chili">
+        <option value="Italian Bread Salad (Panzanella)">
+        <option value="Italian Chocolate Cookies">
+        <option value="Italian Cookies">
+        <option value="Italian Pizzelle">
+        <option value="Italian Potato Salad">
+        <option value="Italian Sausage with Potato, Pepper, &amp; Onion">
+        <option value="Italian Sausage, Tomato, and Zucchini Soup">
+        <option value="Jewish Coffee Cake">
+        <option value="Kentucky Pecan Pie">
+        <option value="Lazy Man&#x27;s Pierogi">
+        <option value="Lemon Chicken with Artichokes">
+        <option value="Lime Jell-O Mold">
+        <option value="London Broil">
+        <option value="Macaroni and Cheese">
+        <option value="Macaroni and Tuna Fish Salad">
+        <option value="Meat Loaf">
+        <option value="Meatballs">
+        <option value="Meatless Tomato Sauce">
+        <option value="Mexican Rice">
+        <option value="Mexican Wedding Cookies">
+        <option value="Missy Potatoes">
+        <option value="Muffins (Zucchini or Carrot)">
+        <option value="Mushroom Marinade">
+        <option value="Mushroom Quiche">
+        <option value="Mushroom-Cheese Appetizers">
+        <option value="Onion Rice">
+        <option value="Oriental Beef Stir-Fry">
+        <option value="Paella">
+        <option value="Parmesan Puffs">
+        <option value="Party Cheese Ball">
+        <option value="Pasta e Fagioli">
+        <option value="Peanut Butter Pie">
+        <option value="Peas and Peanuts">
+        <option value="Peck of Pickles">
+        <option value="Penne Gorgonzola Mascarpone">
+        <option value="Pickled Eggplant">
+        <option value="Pie Pastry">
+        <option value="Pigs-In-A-Blanket">
+        <option value="Pineapple and Kiwi Compote">
+        <option value="Pineapple Bread Stuffing">
+        <option value="Pineapple-Cream Cheese Cake">
+        <option value="Pistachio Cake">
+        <option value="Pizza Dough">
+        <option value="Pizza Margherita">
+        <option value="Pizza Rustica">
+        <option value="Pizza Spread">
+        <option value="Pizzelles">
+        <option value="Portabella Stroganoff">
+        <option value="Potato Pancakes">
+        <option value="Potato Salad">
+        <option value="Potatoes and Beans">
+        <option value="Pumpkin Bars">
+        <option value="Pumpkin Bread">
+        <option value="Pumpkin Cake">
+        <option value="Pumpkin Cake Roll">
+        <option value="Pumpkin Pie">
+        <option value="Raspberry Cream">
+        <option value="Raspberry Pie">
+        <option value="Red Clam Sauce">
+        <option value="Rice Krispies Treats">
+        <option value="Ricotta Filling for Shells or Lasagna">
+        <option value="Ro-Tel Cheese Dip">
+        <option value="Road Trip Cookies">
+        <option value="Roast Beef (for Beef on Weck)">
+        <option value="Roast Pork Boulanger">
+        <option value="Roasted Bell Pepper Salad">
+        <option value="Roasted Chicken">
+        <option value="Sauteed Pork Chops with Apples">
+        <option value="Scalloped Potatoes">
+        <option value="Sesame Seed Cookies">
+        <option value="Shepherd&#x27;s Pie">
+        <option value="Shrimp and Dip">
+        <option value="Shrimp Scampi">
+        <option value="Sloppy Joes">
+        <option value="Snickerdoodles">
+        <option value="Soft Pizza Dough">
+        <option value="Sour Cream Apple Tart">
+        <option value="Sour Cream Coffee Cake">
+        <option value="Spaghetti Pie">
+        <option value="Spaghetti Sauce">
+        <option value="Spaghettini Alfredo Romano">
+        <option value="Special Squash">
+        <option value="Spinach Dip">
+        <option value="Spinach Ricotta Dumplings">
+        <option value="Strawberry Banana Jam">
+        <option value="Strawberry Bavarian Jell-O">
+        <option value="Strawberry Jam (Freezer Jam)">
+        <option value="Strawberry Pie">
+        <option value="Stromboli Slice-A-Sandwich">
+        <option value="Stuffed Artichokes">
+        <option value="Stuffed Banana Peppers">
+        <option value="Stuffed Hot Peppers">
+        <option value="Stuffed Peppers">
+        <option value="Swedish Meatballs">
+        <option value="Swedish Nuts">
+        <option value="Swiss Chard and Potatoes">
+        <option value="Swiss Chard and Tomatoes">
+        <option value="Taco Dip">
+        <option value="Telly Savalas&#x27; Lamb Pallakari">
+        <option value="Thumbprint Cookies">
+        <option value="Toasted Pecans">
+        <option value="Tomato-Basil Sauce">
+        <option value="Tuna Noodle Casserole">
+        <option value="Tuscan Bean Soup Au Gratin">
+        <option value="Vegetable Pizza">
+        <option value="Venison Cacciatore">
+        <option value="Venison Stew">
+        <option value="Waffles">
+        <option value="Watergate Salad">
+        <option value="Western Lima Beans">
+        <option value="Whipped Cream Jell-O">
+        <option value="White Pizza">
+        <option value="Wild Rice and Mushroom Stuffing">
+        <option value="Zucchini &quot;Apple&quot; Pie">
+        <option value="Zucchini Appetizers">
+        <option value="Zucchini Bread">
+        <option value="Zucchini Squares">
+        <option value="Zucchini with Eggplant Tomato Sauce">
+        <option value="Zucchini, Ham &amp; Shells">
+      </datalist>
+    </label>
+    <label>Your photo
+      <input type="file" id="photo" accept="image/*" required>
+      <span class="hint">JPG, PNG or HEIC, up to 15&nbsp;MB.</span>
+    </label>
+    <label>Your name
+      <input type="text" id="name" placeholder="e.g. Christine" maxlength="80" required>
+    </label>
+    <label>Caption <span class="hint">(optional)</span>
+      <input type="text" id="caption" placeholder="e.g. Sunday dinner was a hit!" maxlength="200">
+    </label>
+    <button type="submit" id="submitBtn">Share photo</button>
+    <p id="status" role="status" aria-live="polite"></p>
+  </form>
+  <p class="foot">Porretta family recipes · photos are shared with the whole family</p>
+</main>
+<script>
+(function () {
+  var SUPABASE_URL = 'https://yrcvhuzvoznebuuoiyvc.supabase.co';
+  // Public anonymous key (designed to be embedded in web pages).
+  var ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlyY3ZodXp2b3puZWJ1dW9peXZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk0MTYxMTEsImV4cCI6MjEwNDk5MjExMX0.ck_b9H7wL840vSLX2uPDyKpdjfNUX4OYM8qWNM0-x04';
+  var MAX_BYTES = 15 * 1024 * 1024;
+
+  var form = document.getElementById('uploadForm');
+  var statusEl = document.getElementById('status');
+  var btn = document.getElementById('submitBtn');
+
+  function setStatus(msg, cls) {
+    statusEl.textContent = msg;
+    statusEl.className = cls || '';
+  }
+  function uuid() {
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    return 'id-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var recipe = document.getElementById('recipe').value.trim();
+    var name = document.getElementById('name').value.trim();
+    var caption = document.getElementById('caption').value.trim();
+    var file = document.getElementById('photo').files[0];
+
+    if (!recipe) { setStatus('Please choose or type the recipe name.', 'err'); return; }
+    if (!file) { setStatus('Please choose a photo to upload.', 'err'); return; }
+    if (file.size > MAX_BYTES) { setStatus('Please choose a photo under 15 MB.', 'err'); return; }
+    if (!name) { setStatus('Please tell us your name.', 'err'); return; }
+
+    btn.disabled = true;
+    setStatus('Uploading your photo…', '');
+
+    var ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+    var path = 'site-uploads/' + uuid() + '.' + ext;
+
+    fetch(SUPABASE_URL + '/storage/v1/object/recipe-photos/' + path, {
+      method: 'POST',
+      headers: {
+        'apikey': ANON_KEY,
+        'Authorization': 'Bearer ' + ANON_KEY,
+        'Content-Type': file.type || 'image/jpeg',
+        'x-upsert': 'false'
+      },
+      body: file
+    }).then(function (up) {
+      if (!up.ok) throw new Error('upload-' + up.status);
+      return fetch(SUPABASE_URL + '/rest/v1/photo_submissions', {
+        method: 'POST',
+        headers: {
+          'apikey': ANON_KEY,
+          'Authorization': 'Bearer ' + ANON_KEY,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=representation'
+        },
+        body: JSON.stringify({
+          uploader_name: name,
+          recipe_name: recipe,
+          caption: caption,
+          photo_path: path,
+          status: 'approved'
+        })
+      });
+    }).then(function (ins) {
+      if (!ins.ok) throw new Error('save-' + ins.status);
+      setStatus('Thank you, ' + name + '! Your photo will appear on the family site within the hour.', 'ok');
+      form.reset();
+    }).catch(function (err) {
+      var msg = 'Something went wrong uploading your photo. Please try again.';
+      if (err && err.message && err.message.indexOf('Failed to fetch') !== -1) {
+        msg = 'Could not reach the photo service. Check your connection and try again.';
+      }
+      setStatus(msg, 'err');
+    }).then(function () {
+      btn.disabled = false;
+    });
+  });
+})();
+</script>
+</body>
+</html>
