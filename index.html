@@ -41,7 +41,7 @@
     button { color: inherit; }
     :focus-visible { outline: 3px solid rgba(161, 61, 32, .28); outline-offset: 3px; }
     .shell { width: min(1180px, 100%); margin: 0 auto; padding: var(--safe-top) 24px 56px; }
-    .topbar { min-height: 56px; display: flex; align-items: center; justify-content: flex-end; margin-bottom: 30px; }
+    .topbar { min-height: 56px; display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-bottom: 30px; }
     .button {
       min-height: 46px;
       border: 0;
@@ -231,6 +231,7 @@
       .shell { padding: var(--safe-top) 16px calc(96px + var(--safe-bottom)); }
       .topbar { min-height: 42px; margin-bottom: 20px; }
       .topbar .button { display: none; }
+      .topbar .button.topbar-picture { display: inline-flex; }
       .intro { grid-template-columns: 1fr; gap: 12px; margin-bottom: 24px; }
       h1 { font-size: clamp(44px, 14vw, 64px); }
       .intro p { font-size: 16px; margin-top: 12px; }
@@ -332,6 +333,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
         Add a recipe
       </button>
+      <a class="button ghost topbar-picture" href="upload.html">+ Picture</a>
     </nav>
 
     <section class="intro" aria-labelledby="page-heading">
@@ -430,8 +432,8 @@
           <label>Your name<input id="formName" name="name" autocomplete="name" placeholder="Who should get credit?" required aria-describedby="formNameError" /><span class="field-error" id="formNameError">Add the contributor’s name.</span></label>
         </div>
         <div class="field-row">
-          <label>Family<select id="formFamily" name="family" required aria-describedby="formFamilyError"><option value="Porretta">Porretta</option><option value="Dunnigan">Dunnigan</option><option value="Other">Other</option></select><span class="field-error" id="formFamilyError">Choose a family.</span></label>
-          <label id="formOtherFamilyWrap" hidden>Other family name<input id="formOtherFamily" name="otherFamily" autocomplete="off" placeholder="Family name" aria-describedby="formOtherFamilyError" /><span class="field-error" id="formOtherFamilyError">Add the family name.</span></label>
+          <label>Family<select id="formFamily" name="family" required aria-describedby="formFamilyError"></select><span class="field-error" id="formFamilyError">Choose a family.</span></label>
+          <label id="formOtherFamilyWrap" hidden>New family name<input id="formOtherFamily" name="newFamily" autocomplete="off" placeholder="Family name" aria-describedby="formOtherFamilyError" /><span class="field-error" id="formOtherFamilyError">Add the family name.</span></label>
         </div>
         <div class="field-row">
           <label>Prep time <span class="optional">Optional</span><input id="formPrep" name="prep" placeholder="20 minutes" /></label>
@@ -614,11 +616,59 @@
       });
     }
     function openAddDialog() {
+      state.editingId = null;
+      refreshFamilyOptions();
+      resetAddDialogUi();
+      form.reset();
+      otherFamilyWrap.hidden = true;
       form.style.display = 'grid';
       preview.classList.remove('active');
       copyStatus.textContent = '';
       openDialog(addDialog);
       setTimeout(() => document.getElementById('formTitle').focus(), 120);
+    }
+    function resetAddDialogUi() {
+      document.getElementById('addTitle').textContent = 'Add a recipe';
+      const publishButton = document.getElementById('publishRecipe');
+      if (publishButton) publishButton.textContent = 'Add to the family cookbook';
+    }
+    function openEditDialog(recipe) {
+      state.editingId = recipe.id || null;
+      refreshFamilyOptions();
+      document.getElementById('formTitle').value = recipe.title || '';
+      document.getElementById('formName').value = recipe.contributor || '';
+      const family = (recipe.family || 'Porretta').trim();
+      const known = [...formFamily.options].some(option => option.value === family);
+      if (known) {
+        formFamily.value = family;
+        otherFamilyWrap.hidden = true;
+        document.getElementById('formOtherFamily').value = '';
+      } else {
+        formFamily.value = NEW_FAMILY_VALUE;
+        otherFamilyWrap.hidden = false;
+        document.getElementById('formOtherFamily').value = family;
+      }
+      document.getElementById('formPrep').value = recipe.prep || '';
+      document.getElementById('formCook').value = recipe.cookTime || '';
+      document.getElementById('formServings').value = recipe.servings || '';
+      document.getElementById('formIngredients').value = (recipe.ingredients || []).join('\n');
+      document.getElementById('formDirections').value = (recipe.steps || []).join('\n');
+      document.getElementById('formNotes').value = recipe.note || '';
+      document.getElementById('addTitle').textContent = 'Edit recipe';
+      const publishButton = document.getElementById('publishRecipe');
+      if (publishButton) publishButton.textContent = 'Save changes';
+      form.style.display = 'grid';
+      preview.classList.remove('active');
+      copyStatus.textContent = '';
+      switchingDialogs = true;
+      closeDialog(recipeDialog, false);
+      window.setTimeout(() => {
+        let opened = false;
+        try { opened = openDialog(addDialog); } catch (dialogError) { opened = false; }
+        switchingDialogs = false;
+        if (!opened) closeDialog(addDialog);
+      }, 0);
+      setTimeout(() => document.getElementById('formTitle').focus(), 220);
     }
     function renderRecipes() {
       const visible = visibleRecipes();
@@ -652,12 +702,14 @@
         <p class="detail-byline">${recipe.contributor ? `Contributed by ${escapeHTML(recipe.contributor)}` : 'From the Porretta family cookbook'}</p>
         ${recipe.headnote ? `<p class="detail-headnote">${escapeHTML(recipe.headnote)}</p>` : ''}
         ${details.length ? `<div class="detail-meta">${details.map(item => `<span>${escapeHTML(item)}</span>`).join('')}</div>` : ''}
-        <div class="detail-actions"><button class="button accent" type="button" id="startCooking">Start cooking</button></div>
+        <div class="detail-actions"><button class="button accent" type="button" id="startCooking">Start cooking</button>${recipe.community ? '<button class="button ghost" type="button" id="editCommunityRecipe">Edit recipe</button>' : ''}</div>
         <div class="recipe-sections">
           <section><h3>Ingredients · tap to check</h3><ul class="ingredients">${(recipe.ingredients || []).map((item, index) => ingredientMarkup(item, index, ingredientId)).join('')}</ul></section>
           <section><h3>Directions</h3><ol class="steps">${(recipe.steps || []).map(step => `<li>${escapeHTML(step)}</li>`).join('')}</ol>${recipe.note ? `<p class="cook-note"><strong>Worth knowing:</strong> ${escapeHTML(recipe.note)}</p>` : ''}</section>
         </div>`;
       document.getElementById('startCooking').addEventListener('click', () => startCooking(recipe));
+      const editCommunityButton = document.getElementById('editCommunityRecipe');
+      if (editCommunityButton) editCommunityButton.addEventListener('click', () => openEditDialog(recipe));
       openDialog(recipeDialog);
       recipeDetail.scrollTop = 0;
     }
@@ -742,11 +794,14 @@
         if (!response.ok) return;
         const rows = await response.json();
         const community = (Array.isArray(rows) ? rows : []).map(row => ({
+          id: row.id,
           title: row.title,
           contributor: row.contributor,
           family: row.family || 'Porretta',
           chapter: COMMUNITY_CHAPTER,
           headnote: null,
+          prep: row.prep || null,
+          cookTime: row.cook || null,
           cook: [row.prep, row.cook].filter(Boolean).join(' + ') || null,
           servings: row.servings || null,
           ingredients: String(row.ingredients || '').split('\n').map(s => s.trim()).filter(Boolean),
@@ -761,6 +816,7 @@
           if (!chapterImages[COMMUNITY_CHAPTER]) chapterImages[COMMUNITY_CHAPTER] = chapterImages['Appetizers & Snacks'];
         }
         state.families = [...new Set(state.recipes.map(recipe => recipe.family))];
+        refreshFamilyOptions();
         totalCount.textContent = `${state.recipes.length} family recipes · ${state.families.length} families · ${state.chapters.length} cookbook chapters`;
         renderFilters();
         renderRecipes();
@@ -867,7 +923,7 @@
       const status = document.getElementById('copyStatus');
       const val = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
       let family = val('formFamily') || 'Porretta';
-      if (family === 'Other') family = val('formOtherFamily') || 'Other';
+      if (family === NEW_FAMILY_VALUE) family = val('formOtherFamily') || 'Porretta';
       const payload = {
         title: val('formTitle'),
         contributor: val('formName'),
@@ -880,22 +936,34 @@
         notes: val('formNotes') || null,
         status: 'approved'
       };
+      const editingId = state.editingId || null;
       publishButton.disabled = true;
-      status.textContent = 'Adding it to the cookbook…';
+      status.textContent = editingId ? 'Saving changes…' : 'Adding it to the cookbook…';
       try {
-        const response = await fetch(COMMUNITY_SUPABASE_URL + '/rest/v1/recipe_submissions', {
-          method: 'POST',
-          headers: Object.assign(communityHeaders(true), { Prefer: 'return=minimal' }),
-          body: JSON.stringify(payload)
-        });
+        let response;
+        if (editingId) {
+          response = await fetch(COMMUNITY_SUPABASE_URL + '/rest/v1/recipe_submissions?id=eq.' + encodeURIComponent(editingId), {
+            method: 'PATCH',
+            headers: communityHeaders(true),
+            body: JSON.stringify(payload)
+          });
+        } else {
+          response = await fetch(COMMUNITY_SUPABASE_URL + '/rest/v1/recipe_submissions', {
+            method: 'POST',
+            headers: Object.assign(communityHeaders(true), { Prefer: 'return=minimal' }),
+            body: JSON.stringify(payload)
+          });
+        }
         if (!response.ok) throw new Error('Could not save it — please try again.');
-        status.textContent = 'It’s in the cookbook! You’ll find it under Family addition.';
+        status.textContent = editingId ? 'Saved!' : 'It’s in the cookbook! You’ll find it under Family addition.';
         window.dispatchEvent(new Event('family-recipes-updated'));
         setTimeout(() => {
           const form = document.getElementById('recipeForm');
           const preview = document.getElementById('recipePreview');
           if (preview) preview.classList.remove('active');
           if (form) { form.reset(); form.style.display = 'grid'; }
+          state.editingId = null;
+          resetAddDialogUi();
           status.textContent = '';
           publishButton.disabled = false;
           closeDialog(document.getElementById('addDialog'));
@@ -1016,6 +1084,7 @@
         const cookbookRecipes = book.chapters.flatMap(chapter => chapter.recipes.map(recipe => ({...recipe, family: recipe.family || 'Porretta', chapter: chapter.name})));
         state.recipes = [chili, ...cookbookRecipes];
         state.families = [...new Set(state.recipes.map(recipe => recipe.family))];
+        refreshFamilyOptions();
         totalCount.textContent = `${state.recipes.length} family recipes · ${state.families.length} families · ${state.chapters.length} cookbook chapters`;
         renderFilters();
         renderRecipes();
@@ -1042,8 +1111,29 @@
     });
 
     function cleanLines(value) { return value.split(/\n+/).map(line => line.trim()).filter(Boolean); }
+    const NEW_FAMILY_VALUE = '__new';
+    function refreshFamilyOptions() {
+      const previous = formFamily.value;
+      const names = [...new Set(state.recipes.map(recipe => String(recipe.family || '').trim()).filter(Boolean))];
+      const ordered = ['Porretta', 'Dunnigan'].filter(name => names.includes(name))
+        .concat(names.filter(name => name !== 'Porretta' && name !== 'Dunnigan').sort((a, b) => a.localeCompare(b)));
+      formFamily.innerHTML = '';
+      ordered.forEach(name => {
+        const option = document.createElement('option');
+        option.value = name;
+        option.textContent = name;
+        formFamily.appendChild(option);
+      });
+      const addOption = document.createElement('option');
+      addOption.value = NEW_FAMILY_VALUE;
+      addOption.textContent = '+ Add a new family\u2026';
+      formFamily.appendChild(addOption);
+      if (ordered.includes(previous)) formFamily.value = previous;
+      else if (previous === NEW_FAMILY_VALUE) formFamily.value = NEW_FAMILY_VALUE;
+      otherFamilyWrap.hidden = formFamily.value !== NEW_FAMILY_VALUE;
+    }
     function selectedFamily() {
-      return formFamily.value === 'Other' ? document.getElementById('formOtherFamily').value.trim() : formFamily.value;
+      return formFamily.value === NEW_FAMILY_VALUE ? document.getElementById('formOtherFamily').value.trim() : formFamily.value;
     }
     function setFieldValidity(field, valid) {
       const error = document.getElementById(`${field.id}Error`);
@@ -1052,7 +1142,7 @@
       return valid;
     }
     function validateField(field) {
-      if (field.id === 'formOtherFamily') return setFieldValidity(field, formFamily.value !== 'Other' || Boolean(field.value.trim()));
+      if (field.id === 'formOtherFamily') return setFieldValidity(field, formFamily.value !== NEW_FAMILY_VALUE || Boolean(field.value.trim()));
       if (field.required) return setFieldValidity(field, Boolean(field.value.trim()));
       return true;
     }
@@ -1062,9 +1152,9 @@
       field.addEventListener('input', () => { if (field.getAttribute('aria-invalid') === 'true') validateField(field); });
     });
     formFamily.addEventListener('change', () => {
-      otherFamilyWrap.hidden = formFamily.value !== 'Other';
+      otherFamilyWrap.hidden = formFamily.value !== NEW_FAMILY_VALUE;
       const other = document.getElementById('formOtherFamily');
-      other.required = formFamily.value === 'Other';
+      other.required = formFamily.value === NEW_FAMILY_VALUE;
       setFieldValidity(formFamily, Boolean(formFamily.value));
       if (other.required) setTimeout(() => other.focus(), 0);
       else setFieldValidity(other, true);
@@ -1091,7 +1181,7 @@
     form.addEventListener('submit', event => {
       event.preventDefault();
       const fields = ['formTitle','formName','formIngredients','formDirections'].map(id => document.getElementById(id));
-      if (formFamily.value === 'Other') fields.push(document.getElementById('formOtherFamily'));
+      if (formFamily.value === NEW_FAMILY_VALUE) fields.push(document.getElementById('formOtherFamily'));
       const invalidFields = fields.filter(field => !validateField(field));
       const error = document.getElementById('formError');
       error.style.display = invalidFields.length ? 'block' : 'none';
