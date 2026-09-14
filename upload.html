@@ -29,6 +29,14 @@
   #status { margin:16px 0 0; font-size:.95rem; min-height:1.4em; }
   #status.ok { color:#2e7d32; } #status.err { color:#b3261e; }
   .foot { margin-top:22px; font-size:.85rem; color:#8a7660; text-align:center; }
+  .photo-pick { margin:0 0 16px; }
+  .photo-pick-title { font-size:.95rem; font-weight:bold; display:block; }
+  .photo-pick-buttons { display:flex; gap:10px; margin-top:8px; }
+  .photo-btn { flex:1; margin:0; padding:14px 8px; font-size:1rem; font-family:inherit;
+    font-weight:bold; color:#fff; background:var(--ink); border:none; border-radius:10px;
+    cursor:pointer; text-align:center; display:block; }
+  .visually-hidden { position:absolute; width:1px; height:1px; margin:-1px; padding:0;
+    overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
 </style>
 </head>
 <body>
@@ -293,10 +301,18 @@
         <option value="Zucchini, Ham &amp; Shells">
       </datalist>
     </label>
-    <label>Your photo
-      <input type="file" id="photo" accept="image/*" required>
-      <span class="hint">JPG, PNG or HEIC, up to 15&nbsp;MB.</span>
-    </label>
+    <div class="photo-pick">
+      <span class="photo-pick-title">Your photo</span>
+      <div class="photo-pick-buttons">
+        <label class="photo-btn">📸 Take a photo
+          <input type="file" id="photo" accept="image/*" capture="environment" class="visually-hidden">
+        </label>
+        <label class="photo-btn">🖼️ Choose from library
+          <input type="file" id="photoLib" accept="image/*" class="visually-hidden">
+        </label>
+      </div>
+      <span class="hint" id="photoHint">JPG, PNG or HEIC, up to 15&nbsp;MB.</span>
+    </div>
     <label>Your name
       <input type="text" id="name" placeholder="e.g. Christine" maxlength="80" required>
     </label>
@@ -319,6 +335,13 @@
   var statusEl = document.getElementById('status');
   var btn = document.getElementById('submitBtn');
 
+  var photoHint = document.getElementById('photoHint');
+  function showPickedName(input) {
+    if (input.files && input.files[0]) photoHint.textContent = 'Selected: ' + input.files[0].name;
+  }
+  document.getElementById('photo').addEventListener('change', function () { showPickedName(this); });
+  document.getElementById('photoLib').addEventListener('change', function () { showPickedName(this); });
+
   function setStatus(msg, cls) {
     statusEl.textContent = msg;
     statusEl.className = cls || '';
@@ -333,7 +356,7 @@
     var recipe = document.getElementById('recipe').value.trim();
     var name = document.getElementById('name').value.trim();
     var caption = document.getElementById('caption').value.trim();
-    var file = document.getElementById('photo').files[0];
+    var file = document.getElementById('photo').files[0] || document.getElementById('photoLib').files[0];
 
     if (!recipe) { setStatus('Please choose or type the recipe name.', 'err'); return; }
     if (!file) { setStatus('Please choose a photo to upload.', 'err'); return; }

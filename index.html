@@ -318,6 +318,9 @@
     .photo-upload-dialog label{display:grid;gap:5px;font-size:.88rem;color:#4c3f31}
     .photo-upload-dialog input[type=text]{border:1px solid #d9cdb6;border-radius:10px;padding:9px 11px;font-size:.95rem;font-family:inherit;width:100%}
     .photo-upload-dialog input[type=file]{font-size:.85rem}
+    .photo-upload-dialog .photo-pick-buttons{display:flex;gap:10px;margin:2px 0 6px}
+    .photo-upload-dialog .photo-pick-buttons .button{flex:1;display:inline-flex;margin:0;color:#fff;font-size:.95rem}
+    .visually-hidden{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
     .photo-upload-recipe{margin:0;font-size:.92rem;color:#6d5c4b}
 
 </style>
@@ -1296,7 +1299,11 @@
         '<button type="button" class="icon-button" data-uclose aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>'+
         '<div class="modal-body">'+
         '<p class="photo-upload-recipe">For <strong data-rname></strong> \u2014 filed under this recipe automatically.</p>'+
-        '<label>Your photo<input type="file" data-ufile accept="image/*"></label>'+
+        '<label>Your photo</label>'+
+        '<div class="photo-pick-buttons">'+
+        '<label class="button">\ud83d\udcf8 Take a photo<input type="file" data-ufile accept="image/*" capture="environment" class="visually-hidden"></label>'+
+        '<label class="button">\ud83d\uddbc\ufe0f Choose from library<input type="file" data-ufilelib accept="image/*" class="visually-hidden"></label>'+
+        '</div>'+
         '<label>Your name<input type="text" data-uname maxlength="80" placeholder="e.g. Daniel" autocomplete="off"></label>'+
         '<label>Caption <span style="color:#a08c74">(optional)</span><input type="text" data-ucaption maxlength="200" placeholder="Sunday sauce night\u2026" autocomplete="off"></label>'+
         '<p class="form-status" data-ustatus></p>'+
@@ -1309,6 +1316,7 @@
     uploadDlg.dataset.recipe=recipeTitle||'';
     uploadDlg.querySelector('[data-rname]').textContent=recipeTitle||'';
     uploadDlg.querySelector('[data-ufile]').value='';
+    uploadDlg.querySelector('[data-ufilelib]').value='';
     uploadDlg.querySelector('[data-uname]').value='';
     uploadDlg.querySelector('[data-ucaption]').value='';
     setStatus('');
@@ -1325,7 +1333,8 @@
     var name=uploadDlg.querySelector('[data-uname]').value.trim();
     var caption=uploadDlg.querySelector('[data-ucaption]').value.trim();
     var fi=uploadDlg.querySelector('[data-ufile]');
-    var file=fi.files&&fi.files[0];
+    var fli=uploadDlg.querySelector('[data-ufilelib]');
+    var file=(fi.files&&fi.files[0])||(fli.files&&fli.files[0]);
     if(!file){setStatus('Choose a photo first.',true);return;}
     if(file.size>15*1024*1024){setStatus('That photo is over 15 MB \u2014 please pick a smaller one.',true);return;}
     if(!name){setStatus('Add your name so the family knows who made it.',true);return;}
