@@ -52,12 +52,11 @@ module.exports = async function handler(req, res) {
       method: 'POST',
       headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'anthropic/claude-haiku-4.5',
+        model: 'deepseek/deepseek-v4.1-flash',
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
           { role: 'user', content: text }
         ],
-        response_format: { type: 'json_object' },
         temperature: 0.2,
         max_tokens: 1600
       })
