@@ -52,7 +52,7 @@ module.exports = async function handler(req, res) {
       method: 'POST',
       headers: { 'Authorization': 'Bearer ' + apiKey, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'deepseek/deepseek-v4.1-flash',
+        model: 'openai/gpt-5.4-nano',
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
           { role: 'user', content: text }
