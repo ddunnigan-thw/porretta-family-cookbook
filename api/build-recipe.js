@@ -62,8 +62,20 @@ module.exports = async function handler(req, res) {
         max_tokens: 1600
       })
     });
-    if (!gw.ok) throw new Error('AI gateway error ' + gw.status);
-    const data = await gw.json();
+    if (!gw.ok) {
+      let errText = '';
+      try { errText = await gw.text(); } catch (e) { /* ignore */ }
+      console.error('[build-recipe] gateway HTTP ' + gw.status + ': ' + errText.slice(0, 600));
+      res.status(502).json({ error: 'The AI helper had trouble — please try again.' });
+      return;
+    }
+    let data;
+    try { data = await gw.json(); }
+    catch (e) {
+      console.error('[build-recipe] gateway returned non-JSON payload');
+      res.status(502).json({ error: 'The AI helper had trouble — please try again.' });
+      return;
+    }
     const content = data && data.choices && data.choices[0] && data.choices[0].message
       ? data.choices[0].message.content : '';
     let recipe;
@@ -82,6 +94,7 @@ module.exports = async function handler(req, res) {
       notes: strOrNull(recipe.notes, 1000)
     });
   } catch (err) {
+    console.error('[build-recipe] failed:', (err && err.message) || err);
     res.status(502).json({ error: 'The AI helper had trouble — please try again.' });
   }
 };
